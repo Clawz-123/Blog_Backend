@@ -4,6 +4,8 @@ from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 
+from .managers import CustomUserManager
+
 class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
@@ -12,6 +14,7 @@ class User(AbstractUser):
     date_joined = models.DateTimeField(auto_now_add=True)
 
 
+    objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
