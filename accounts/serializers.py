@@ -1,0 +1,71 @@
+from rest_framework import serializers
+from .models import User
+
+
+class UserResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'first_name', 'last_name', 'date_joined']
+        read_only_fields = ['id', 'date_joined']
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        feilds = ['email', 'first_name', 'last_name', 'password']
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value    
+    
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must be at least 8 characters long.")
+        return value
+    
+    def validation_first_name(self, value):
+        if not value:
+            raise serializers.ValidationError("First_name cannot be empty")
+        elif len(value) < 2:
+            raise serializers.ValidationError("First_name must be at least 2 characters long.")
+        return value
+    
+    def validation_last_name(self, value):
+        if not value:
+            raise serializers.ValidationError("Last_name cannot be empty")
+        elif len(value) < 2:
+            raise serializers.ValidationError("Last_name must be at least 2 characters long.")
+        return value
+    
+
+    def create(self, validated_data):
+        user = User(
+            email=validated_data['email'],
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', '')
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user 
+    
+class UserLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(write_only=True, required=True)
+
+    def validate_email(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({"email": "User with this email does not exist."})
+        
+        if not user.check_password(password):
+            raise serializers.ValidationError({"password": "Incorrect password."})
+        
+        attrs['user'] = user
+        return attrs
