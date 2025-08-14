@@ -29,6 +29,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+AUTH_USER_MODEL = 'accounts.User'
+
 
 # Application definition
 
@@ -39,13 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'blog',
-    'blog_api',
+    'accounts',
     'rest_framework',
     'drf_yasg',
     'corsheaders',
     'rest_framework_simplejwt',
-    'accounts'
 ]
 
 MIDDLEWARE = [
@@ -143,7 +143,7 @@ REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework_simplejwt.token_blacklist',
+        # 'rest_framework_simplejwt.token_blacklist',
     ),
 }
 

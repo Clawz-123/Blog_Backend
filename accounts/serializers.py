@@ -14,7 +14,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        feilds = ['email', 'first_name', 'last_name', 'password']
+        fields = ['email', 'first_name', 'last_name', 'password']
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -25,21 +25,20 @@ class UserCreateSerializer(serializers.ModelSerializer):
         if len(value) < 8:
             raise serializers.ValidationError("Password must be at least 8 characters long.")
         return value
-    
-    def validation_first_name(self, value):
+
+    def validate_first_name(self, value):
         if not value:
             raise serializers.ValidationError("First_name cannot be empty")
         elif len(value) < 2:
             raise serializers.ValidationError("First_name must be at least 2 characters long.")
         return value
-    
-    def validation_last_name(self, value):
+
+    def validate_last_name(self, value):
         if not value:
             raise serializers.ValidationError("Last_name cannot be empty")
         elif len(value) < 2:
             raise serializers.ValidationError("Last_name must be at least 2 characters long.")
         return value
-    
 
     def create(self, validated_data):
         user = User(
@@ -49,13 +48,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
         )
         user.set_password(validated_data['password'])
         user.save()
-        return user 
+        return user
     
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
 
-    def validate_email(self, attrs):
+    def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
 
@@ -63,9 +62,9 @@ class UserLoginSerializer(serializers.Serializer):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             raise serializers.ValidationError({"email": "User with this email does not exist."})
-        
+
         if not user.check_password(password):
             raise serializers.ValidationError({"password": "Incorrect password."})
-        
+
         attrs['user'] = user
         return attrs
