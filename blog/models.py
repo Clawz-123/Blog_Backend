@@ -6,6 +6,13 @@ import uuid
 
 
 class Blog(models.Model):
+   class GenreChoices(models.TextChoices):
+         TECHNOLOGY = "Technology", _("Technology")
+         LIFESTYLE = "Lifestyle", _("Lifestyle")
+         TRAVEL = "Travel", _("Travel")
+         FOOD = "Food", _("Food")
+         HEALTH = "Health", _("Health")
+       
    id = models.UUIDField(
        primary_key=True, default=uuid.uuid4, editable=False, unique=True
    )
@@ -17,7 +24,10 @@ class Blog(models.Model):
    image = models.ImageField(
        _(""), upload_to="blog_images/", blank=True, null=True
     )
-   
+    
+   genre = models.CharField(
+        _(""), max_length=20, choices=GenreChoices.choices
+    )
    content = models.TextField(_(""))
 
    created_at = models.DateTimeField(
@@ -33,21 +43,5 @@ class Meta:
     ordering = ["-id"]
 
 
-class Choices(models.Choices):
-    TECHNOLOGY = "Technology"
-    DESIGN = "Design"
-    BUSINESS = "Business"
-    PROGRAMMING = "Programming"
 
-    STATUS_CHOICES = [
-        (TECHNOLOGY, _("Technology")),
-        (DESIGN, _("Design")),
-        (BUSINESS, _("Business")),
-        (PROGRAMMING, _("Programming")),
-    ]
-
-    class Meta:
-        verbose_name = _("Choice")
-        verbose_name_plural = _("Choices")
-        ordering = ["-id"]
         

@@ -7,7 +7,7 @@ class UserResponseSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'date_joined']
         read_only_fields = ['id', 'date_joined']
-
+    
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
