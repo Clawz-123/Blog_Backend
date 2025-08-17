@@ -1,5 +1,4 @@
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status, generics
 
 
@@ -71,8 +70,9 @@ class RegisterUserView(generics.CreateAPIView):
                 status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
             )  
 
-class UserLoginView(APIView):
+class UserLoginView(TokenObtainPairView):
     permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
     serializer_class = UserLoginSerializer
 
     @swagger_auto_schema(
