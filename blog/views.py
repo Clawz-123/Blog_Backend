@@ -6,6 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from core.responses import api_response
+from .models import Blog
 
 from django.db import transaction
 
@@ -19,6 +20,7 @@ from .serializers import (
 class UserBlogView(generics.ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = BlogResponseSerializer
+    queryset = Blog.objects.all()
 
     @swagger_auto_schema(
         operation_description="Get user blogs",
@@ -30,9 +32,8 @@ class UserBlogView(generics.ListAPIView):
             400: openapi.Response(description="Bad Request"),
             500: openapi.Response(description="Internal Server Error"),
         },
-        tags=["Blog"],
+        tags=["Blogs"],
     )
-
     def list(self):
         try:
             queryset = self.get_queryset()
@@ -66,7 +67,7 @@ class BlogCreateView(generics.CreateAPIView):
             400: openapi.Response(description="Bad Request"),
             500: openapi.Response(description="Internal Server Error"),
         },
-        tags=["Blog"],
+        tags=["Blogs"],
     )
 
     def post(self, request):
@@ -94,6 +95,7 @@ class BlogCreateView(generics.CreateAPIView):
 class BlogUpdateView(generics.UpdateAPIView):
     permission_classes = [AllowAny]
     serializer_class = BlogUpdateSerializer
+    queryset = Blog.objects.all()
 
     @swagger_auto_schema(
         operation_description="Update an existing blog",
@@ -103,9 +105,8 @@ class BlogUpdateView(generics.UpdateAPIView):
             400: openapi.Response(description="Bad Request"),
             500: openapi.Response(description="Internal Server Error"),
         },
-        tags=["Blog"],
+        tags=["Blogs"],
     )
-
     def put(self, request):
         try:
             instance = self.get_object()
@@ -128,10 +129,45 @@ class BlogUpdateView(generics.UpdateAPIView):
                 error_message=[str(e), "Internal Server Error"],
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+            
+    @swagger_auto_schema(
+        operation_description="Partially update an existing blog",
+        request_body=BlogUpdateSerializer,
+        responses={
+            200: openapi.Response(description="Blog updated successfully"),
+            400: openapi.Response(description="Bad Request"),
+            500: openapi.Response(description="Internal Server Error"),
+        },
+        tags=["Blogs"],
+    )
+    def patch(self, request):
+        try:
+            instance = self.get_object()
+            serializer = self.serializer_class(instance, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return api_response(
+                    is_success=True,
+                    status_code=status.HTTP_200_OK,
+                    result={"message": "Blog updated successfully"}
+                )
+            return api_response(
+                is_success=False,
+                error_message=serializer.errors,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return api_response(
+                is_success=False,
+                error_message=[str(e), "Internal Server Error"],
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
 
 class BlogDeleteView(generics.DestroyAPIView):
     permission_classes = [AllowAny]
     serializer_class = BlogResponseSerializer
+    queryset = Blog.objects.all()
 
     @swagger_auto_schema(
         operation_description="Delete a blog",
@@ -140,10 +176,9 @@ class BlogDeleteView(generics.DestroyAPIView):
             400: openapi.Response(description="Bad Request"),
             500: openapi.Response(description="Internal Server Error"),
         },
-        tags=["Blog"],
+        tags=["Blogs"],
     )
-
-    def delete(self):
+    def delete(self, request):
         try:
             instance = self.get_object()
             instance.delete()
